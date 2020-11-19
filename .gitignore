@@ -1,2 +1,4 @@
 /discord
-/livestream
+/livestream/.env
+/livestream/node_modules
+/livestream/client_secret.json
