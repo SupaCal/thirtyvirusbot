@@ -12,14 +12,17 @@ class DiscordSender {
   startClient() {
     this.client = new Client();
     this.client.on("ready", () => {
-      isReady = true;
+      this.isReady = true;
     });
+    this.client.login(process.env.BOT_TOKEN);
   }
-  newVideo() {
+  newVideo(link) {
     if (this.isReady) {
-      this.client.channels.cache.get('').send('hi')
+      this.client.channels.cache.get('576188537356025869').send(link)
     }
   }
 }
 
-client.login(process.env.BOT_TOKEN);
+
+
+module.exports = DiscordSender;
