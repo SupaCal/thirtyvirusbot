@@ -129,21 +129,28 @@ function storeToken(token) {
 function main(auth) {
   var isReady = false;
   var client = new Client();
+  let re = new RegExp('(?:https?:\/{2})?(?:w{3}\.)?youtu(?:be)?\.(?:com|be)(?:\/watch\?v=|\/)([^\s&]+)')
   client.on("ready", () => {
     isReady = true;
     //client.channels.cache.get('779579757260046366').messages.fetch('779790841299599402').then(message => console.log(message.content)).catch(console.error);
     //match(/-(\r\n|\r|\n)https:\/\/www\.youtube\.com\/watch\?v=(.+)/g)[1])
   });
   client.on('message', (msg) => {
-    service.videos.list({auth: auth, id: msg.content.match(/https:\/\/www\.youtube\.com\/watch\?v=(.+)/g)[1], part: 'snippet'}, (err, response) => {
-      var desc = response.data.items[0].snippet.description;
-      if(desc.includes('*this is a stream*')){
-        newStream(msg.content)
-      }else{
-        newVideo(msg.content)
+    if(msg.channel.id == '779579757260046366'){
+      if(msg.content.includes('youtube.com')){
+        var vdid = msg.content.split('v=')
+        console.log(vdid);
+        service.videos.list({auth: auth, id: vdid[1], part: 'snippet'}, (err, response) => {
+          console.log(err);
+          var desc = response.data.items[0].snippet.description;
+          if(desc.includes('*this is a stream*')){
+            newStream(msg.content)
+          }else{
+            newVideo(msg.content)
+          }
+        });
       }
-    })
-    ;
+    }
   })
   function sendMessage(chid, msg){
     if(isReady){
