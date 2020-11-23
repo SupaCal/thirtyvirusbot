@@ -127,6 +127,7 @@ function storeToken(token) {
  * @param {google.auth.OAuth2} auth An authorized OAuth2 client.
  */
 function main(auth) {
+  var config = JSON.parse(fs.readFileSync('discconfig.json'));
   var isReady = false;
   var client = new Client();
   let re = new RegExp('(?:https?:\/{2})?(?:w{3}\.)?youtu(?:be)?\.(?:com|be)(?:\/watch\?v=|\/)([^\s&]+)')
@@ -136,32 +137,52 @@ function main(auth) {
     //match(/-(\r\n|\r|\n)https:\/\/www\.youtube\.com\/watch\?v=(.+)/g)[1])
   });
   client.on('message', (msg) => {
-    if(msg.channel.id == '779579757260046366'){
+    if(msg.channel.id == config.channelids.mee6){
       if(msg.content.includes('youtube.com')){
-        var vdid = msg.content.split('v=')
-        console.log(vdid);
+        var vdid = msg.content.match(/(?:youtube(?:-nocookie)?\.com\/(?:[^\/\n\s]+\/\S+\/|(?:v|e(?:mbed)?)\/|\S*?[?&]v=)|youtu\.be\/)([a-zA-Z0-9_-]{11})/)
+        //console.log(vdid);
+        var link = 'http://' + vdid[0]
         service.videos.list({auth: auth, id: vdid[1], part: 'snippet'}, (err, response) => {
-          console.log(err);
+          //console.log(err);
           var desc = response.data.items[0].snippet.description;
           if(desc.includes('*this is a stream*')){
-            newStream(msg.content)
+            if(isLive(vdid[1])){
+              
+            }else {
+              global[vdid[1]] = setInterval(() => {
+                if(isLive(vdid[1])){
+                  newStream(link)
+                  clearInterval(global[vdid[1]])
+                }
+              }, 60000)
+            }
+            console.log(response.data.items[0].snippet)
+            
           }else{
-            newVideo(msg.content)
+            newVideo(link)
           }
         });
       }
     }
   })
+  //if()
+
   function sendMessage(chid, msg){
     if(isReady){
       client.channels.cache.get(chid).send(msg)
     }
   }
   function newVideo (url){
-    sendMessage('779804200842035230', url)
+    sendMessage(config.channelids.videos, 'ThirtyVirus posted a video! <@&'+ config.roleids.videos +'> ' + url)
   }
   function newStream (url){
-    sendMessage('779804181787181096', url)
+    sendMessage(config.channelids.streams, 'ThirtyVirus has gone live! <@&'+ config.roleids.streams +'> ' + url)
+  }
+  function isLive(vdid){
+    service.videos.list({auth: auth, id: vdid, part: 'snippet'}, (err, response) => {
+      if(response.data.items[0].snippet.liveBroadcastContent == "upcoming") return false
+      else return true
+    })
   }
   var liveStreamStarted;
   var service = google.youtube("v3");
