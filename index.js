@@ -28,10 +28,10 @@ client.on("message", (msg) => {
             if (islive) {
               newStream(link);
             } else {
-              global.stream = setInterval(() => {
+              global.ytstream = setInterval(() => {
                 isLive(vdid[1]).then((data) => {
                   if (data) {
-                    clearInterval(global.stream);
+                    clearInterval(global.ytstream);
                     newStream(link);
                   }
                 });
