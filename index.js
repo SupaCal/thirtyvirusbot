@@ -19,7 +19,7 @@ client.on("message", (msg) => {
         /(?:youtube(?:-nocookie)?\.com\/(?:[^\/\n\s]+\/\S+\/|(?:v|e(?:mbed)?)\/|\S*?[?&]v=)|youtu\.be\/)([a-zA-Z0-9_-]{11})/
       );
       //console.log(vdid);
-      var link = "http://" + vdid[0];
+      var link = "https://" + vdid[0];
       youtube.videos.list({ id: vdid[1], part: "snippet" }, (err, response) => {
         //console.log(err);
         var desc = response.data.items[0].snippet.description;
