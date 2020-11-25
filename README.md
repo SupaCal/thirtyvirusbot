@@ -1,5 +1,5 @@
 # thirtyvirusbot
 
-This is a project to make a bot that relays youtube donations and sends them in his discord
+A Discord bot that differentiates YouTube streams from videos
 
 Progress: https://trello.com/b/Zkn4IIVa/bot
