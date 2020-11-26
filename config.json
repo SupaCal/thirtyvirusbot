@@ -7,5 +7,8 @@
     "roleids": {
         "videos": "780282548667940884",
         "streams": "780282483173752832"
+    },
+    "streamlabs": {
+        "enabled": true
     }
 }
