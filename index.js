@@ -1,6 +1,6 @@
 var fs = require("fs");
 var { google } = require("googleapis");
-const { Client } = require("discord.js");
+const { Client, MessageEmbed } = require("discord.js");
 require("dotenv").config();
 
 const youtube = google.youtube({ auth: process.env.GOOGLE_KEY, version: "v3" });
@@ -10,9 +10,10 @@ var isReady = false;
 var client = new Client();
 client.on("ready", () => {
   isReady = true;
+ 
+  
 });
 client.on("message", (msg) => {
-  msg.channel.send();
   if (msg.channel.id == config.channelids.mee6) {
     var vdid = msg.content.match(
       /(?:youtube(?:-nocookie)?\.com\/(?:[^\/\n\s]+\/\S+\/|(?:v|e(?:mbed)?)\/|\S*?[?&]v=)|youtu\.be\/)([a-zA-Z0-9_-]{11})/
@@ -52,16 +53,27 @@ if (config.streamlabs.enabled) {
       `https://sockets.streamlabs.com?token=${process.env.WS_KEY}`
     );
     streamlabs.on("event", (slevent) => {
-      console.log(slevent);
-      if (slevent.type === "donation") {
-        console.log(slevent.message[0].name.toString());
-        console.log(`Name = ${slevent.message[0].name.toString()}`);
-        client.channels.cache
-          .get("781325325417709629")
-          .send(slevent.message[0].name.toString());
-        //sendMessage('781325325417709629', slevent.message[0].from)
+      switch (slevent.type){
+        case 'subscription':
+          if(slevent.for === 'twitch_account'){
+            sendMessage(config.channelids.donos, new MessageEmbed().setTitle('Thanks for the subscription ' + slevent.message[0].name).setColor('#8400FF').addFields({name: 'Message', value: slevent.message[0].message}, {name: 'Months', value: slevent.message[0].months}))
+          }else if(slevent.for === 'youtube_account'){
+            sendMessage(config.channelids.donos, new MessageEmbed().setTitle('Thanks for becoming a member ' + slevent.message[0].name).setColor('#FF0000').addFields({name: 'Months', value: slevent.message[0].months}))
+          }
+          break;
+        case 'donation':
+          sendMessage(config.channelids.donos, new MessageEmbed().setTitle('Thanks for donating ' + slevent.message[0].from).setColor('#80F5D2').addFields({name: 'Amount', value: slevent.message[0].formatted_amount}, {name: 'Message', value: slevent.message[0].message}))
+          break;
+        case 'superchat':
+          if(slevent.message[0].comment){
+            sendMessage(config.channelids.donos, new MessageEmbed().setTitle('Thank you for the Superchat ' + slevent.message[0].name).setColor('#FF0000').addFields({name: 'Message', value: slevent.message[0].comment}, {name: 'Amount', value: slevent.message[0].displayString}))
+          }
+          break;
+        default:
+          break;
       }
-      //sendMessage('781325325417709629', slevent)
+      console.log(slevent)
+      
     });
   } else console.log("No Streamlabs websocket key provided");
 }
